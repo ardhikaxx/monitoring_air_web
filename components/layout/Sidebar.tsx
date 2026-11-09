@@ -1,24 +1,21 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { useSystem } from '@/context/SystemContext';
 import {
   LayoutDashboard,
+  Layers,
   Activity,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  LineChart,
   Sliders,
-  FlaskConical,
-  Settings,
+  LineChart,
+  History,
+  Scale,
+  Cpu,
   Wifi,
   WifiOff,
-  Cpu,
   X,
   Droplets,
-  Layers,
+  Radio,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,75 +24,100 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const pathname = usePathname();
   const { deviceStatus, warningCount, criticalCount } = useSystem();
+  const [activeSection, setActiveSection] = useState('overview');
 
-  const navItems = [
-    {
-      label: 'Dashboard',
-      href: '/dashboard',
-      icon: LayoutDashboard,
-      badge: null,
-    },
-    {
-      label: 'Monitoring Sensor',
-      href: '/monitoring',
-      icon: Activity,
-      badge:
-        warningCount + criticalCount > 0 ? (
-          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300">
-            {warningCount + criticalCount}
+  const navItems = React.useMemo(
+    () => [
+      {
+        id: 'overview',
+        label: 'Dashboard Overview',
+        icon: LayoutDashboard,
+        badge: null,
+      },
+      {
+        id: 'water-treatment',
+        label: 'Alur Filtrasi Air',
+        icon: Layers,
+        badge: <span className="text-[9px] font-mono text-cyan-300">Proses</span>,
+      },
+      {
+        id: 'monitoring',
+        label: 'Monitoring Sensor',
+        icon: Activity,
+        badge:
+          warningCount + criticalCount > 0 ? (
+            <span className="px-1.5 py-0.2 text-[9px] font-bold rounded-full bg-amber-500/20 text-amber-300">
+              {warningCount + criticalCount}
+            </span>
+          ) : (
+            <span className="text-[9px] font-mono text-emerald-300">7 Sens</span>
+          ),
+      },
+      {
+        id: 'quality-comparison',
+        label: 'Komparasi Kualitas',
+        icon: Scale,
+        badge: null,
+      },
+      {
+        id: 'control-panel',
+        label: 'Control Panel',
+        icon: Sliders,
+        badge: (
+          <span className="px-1.5 py-0.2 text-[8px] font-bold tracking-wider rounded bg-blue-500/30 text-blue-200">
+            UJI
           </span>
-        ) : null,
-    },
-    {
-      label: 'Inlet Monitoring',
-      href: '/monitoring/inlet',
-      icon: ArrowDownToLine,
-      badge: <span className="text-[10px] text-blue-300 font-mono">4 Sens</span>,
-    },
-    {
-      label: 'Outlet Monitoring',
-      href: '/monitoring/outlet',
-      icon: ArrowUpFromLine,
-      badge: <span className="text-[10px] text-emerald-300 font-mono">3 Sens</span>,
-    },
-    {
-      label: 'Grafik dan Histori',
-      href: '/history',
-      icon: LineChart,
-      badge: null,
-    },
-    {
-      label: 'Control Panel',
-      href: '/control-panel',
-      icon: Sliders,
-      badge: (
-        <span className="px-1.5 py-0.2 text-[9px] font-semibold tracking-wider rounded bg-blue-500/30 text-blue-200">
-          IOT
-        </span>
-      ),
-    },
-    {
-      label: 'Pengujian Sensor',
-      href: '/sensor-testing',
-      icon: FlaskConical,
-      badge: null,
-    },
-    {
-      label: 'Pengaturan',
-      href: '/settings',
-      icon: Settings,
-      badge: null,
-    },
-  ];
+        ),
+      },
+      {
+        id: 'charts',
+        label: 'Monitoring Chart',
+        icon: LineChart,
+        badge: null,
+      },
+      {
+        id: 'activity',
+        label: 'Recent Activity',
+        icon: History,
+        badge: null,
+      },
+    ],
+    [warningCount, criticalCount]
+  );
 
-  const isActive = (href: string) => {
-    if (href === '/dashboard' && (pathname === '/' || pathname === '/dashboard')) {
-      return true;
+  // Smooth scroll to section
+  const handleScrollTo = (sectionId: string) => {
+    setActiveSection(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    return pathname === href;
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
   };
+
+  // Scrollspy to detect active section
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 140;
+      for (const item of navItems) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveSection(item.id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [navItems]);
 
   return (
     <>
@@ -115,19 +137,20 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {/* Brand Header */}
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#1677C8] to-blue-400 p-2 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
-              <Droplets className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-[#1677C8] to-cyan-400 p-2 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <Droplets className="w-5 h-5 text-white" />
+              <Radio className="w-3.5 h-3.5 text-white absolute -top-1 -right-1 animate-pulse text-cyan-200" />
             </div>
             <div>
-              <h1 className="font-bold text-base tracking-tight leading-none text-white flex items-center gap-1.5">
-                Water Treatment <span className="text-cyan-400 font-extrabold text-xs">IoT</span>
+              <h1 className="font-extrabold text-base tracking-tight leading-none text-white flex items-center gap-1.5">
+                AquaMonitor <span className="text-cyan-400 font-bold text-[10px] px-1 py-0.2 rounded bg-cyan-950/60 border border-cyan-500/30">IoT</span>
               </h1>
-              <p className="text-[10px] text-blue-200 tracking-wider font-semibold uppercase mt-1">
-                Industrial Monitoring
+              <p className="text-[10px] text-blue-200 tracking-wider font-medium mt-1">
+                Water Treatment System
               </p>
             </div>
-          </Link>
+          </div>
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-white/70 hover:text-white hover:bg-white/10 lg:hidden transition-colors"
@@ -136,24 +159,20 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* Navigation Items */}
+        {/* Navigation Items (Anchor / Scroll to Section) */}
         <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-1">
           <div className="px-3 pb-2 text-[10px] font-bold text-blue-300 uppercase tracking-widest flex items-center gap-1.5">
-            <Layers className="w-3 h-3" />
-            <span>Menu Navigasi</span>
+            <span>Navigasi Single Page</span>
           </div>
 
           {navItems.map((item) => {
-            const active = isActive(item.href);
+            const active = activeSection === item.id;
             const Icon = item.icon;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => {
-                  if (window.innerWidth < 1024) onClose();
-                }}
-                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              <button
+                key={item.id}
+                onClick={() => handleScrollTo(item.id)}
+                className={`w-full group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
                   active
                     ? 'bg-[#1677C8] text-white shadow-md shadow-blue-900/30 font-semibold'
                     : 'text-slate-200 hover:text-white hover:bg-white/10'
@@ -168,7 +187,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <span>{item.label}</span>
                 </div>
                 {item.badge}
-              </Link>
+              </button>
             );
           })}
         </div>
@@ -214,7 +233,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
 
           <div className="mt-2.5 px-1 flex items-center justify-between text-[10px] text-blue-300/80">
-            <span>Water Treatment IoT</span>
+            <span>AquaMonitor System</span>
             <span className="font-mono">v1.2.0-iot</span>
           </div>
         </div>

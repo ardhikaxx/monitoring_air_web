@@ -29,7 +29,7 @@ export default function WaterQualityComparison() {
   const tempDiff = (tempOut - tempIn).toFixed(1);
 
   return (
-    <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-5">
+    <div id="quality-comparison" className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div>
