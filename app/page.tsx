@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   AlertOctagon,
   Gauge,
-  Waves,
   RefreshCw,
   LineChart,
 } from 'lucide-react';
@@ -42,45 +41,32 @@ export default function SinglePageDashboard() {
   return (
     <AppLayout>
       {/* SECTION 1: OVERVIEW & DEVICE CONNECTION */}
-      <section id="overview" className="space-y-6">
-        {/* Hero Banner */}
-        <div className="bg-gradient-to-r from-[#123B5D] via-[#163B5C] to-[#1677C8] rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-950/15 relative overflow-hidden">
-          {/* Subtle water wave background */}
-          <div className="absolute right-0 bottom-0 translate-y-1/4 translate-x-1/8 opacity-10 pointer-events-none">
-            <Waves className="w-96 h-96 text-white" />
+      <section id="overview" className="space-y-5">
+        {/* Simple & Clean Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Monitoring Pengolahan Air
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Pemantauan telemetri sensor sebelum (inlet) dan sesudah (outlet) proses filtrasi.
+            </p>
           </div>
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs text-blue-200 font-semibold tracking-wide uppercase">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                AquaMonitor IoT Platform • Single Page Dashboard
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
-                IoT Water Treatment Monitoring System
-              </h1>
-              <p className="text-sm text-blue-100/90 leading-relaxed">
-                Monitoring kondisi air sebelum dan sesudah proses penjernihan secara real-time.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-              <button
-                onClick={refreshAllData}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white text-xs font-semibold backdrop-blur-md border border-white/20 transition-all shadow-xs"
-              >
-                <RefreshCw className="w-4 h-4 text-cyan-300" />
-                <span>Refresh Telemetri</span>
-              </button>
-
-              <button
-                onClick={() => scrollToSection('charts')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-[#0e2b44] text-xs font-bold transition-all shadow-md shadow-cyan-500/25"
-              >
-                <LineChart className="w-4 h-4 text-[#0e2b44]" />
-                <span>Lihat Grafik</span>
-              </button>
-            </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={refreshAllData}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 active:scale-95 text-slate-700 text-xs font-medium transition-all shadow-2xs"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+              <span>Refresh Data</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('charts')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-medium transition-all shadow-2xs"
+            >
+              <LineChart className="w-3.5 h-3.5" />
+              <span>Lihat Grafik</span>
+            </button>
           </div>
         </div>
 
@@ -97,7 +83,7 @@ export default function SinglePageDashboard() {
             subtitle="4 Inlet + 3 Outlet"
             icon={Activity}
             variant="blue"
-            badgeText="7 Terpasang"
+            badgeText="7 Sensor"
           />
 
           {/* Sensor Normal */}
@@ -116,10 +102,10 @@ export default function SinglePageDashboard() {
             title="Sensor Warning"
             value={warningCount}
             unit="Unit"
-            subtitle="Mendekati Ambang"
+            subtitle="Mendekati Batas"
             icon={AlertTriangle}
             variant="amber"
-            badgeText={warningCount > 0 ? 'Perlu Atensi' : 'Aman'}
+            badgeText={warningCount > 0 ? 'Perlu Cek' : 'Aman'}
           />
 
           {/* Sensor Error / Offline */}
@@ -130,7 +116,7 @@ export default function SinglePageDashboard() {
             subtitle="Kritis / Terputus"
             icon={AlertOctagon}
             variant={criticalCount + offlineCount > 0 ? 'rose' : 'slate'}
-            badgeText={criticalCount + offlineCount > 0 ? 'Tindakan' : 'Nol'}
+            badgeText={criticalCount + offlineCount > 0 ? 'Tindakan' : '0'}
           />
 
           {/* Flow Rate Saat Ini */}
@@ -139,10 +125,10 @@ export default function SinglePageDashboard() {
               title="Debit Aliran"
               value={flowSensor?.value ?? 20.3}
               unit="L/jam"
-              subtitle={`Tekanan: ${flowSensor?.secondaryValue ?? 1.82} bar`}
+              subtitle={`Tekanan ${flowSensor?.secondaryValue ?? 1.82} bar`}
               icon={Gauge}
               variant="blue"
-              badgeText="Kapasitas ~20 L/j"
+              badgeText="~20 L/j"
             />
           </div>
         </div>

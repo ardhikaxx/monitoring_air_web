@@ -19,7 +19,6 @@ import {
   LineChart as ChartIcon,
   Layers,
   BarChart3,
-  Sparkles,
 } from 'lucide-react';
 
 interface TelemetryPoint {
@@ -52,9 +51,9 @@ const CustomTooltip = ({ active, payload, activeParameter = 'turbidity' }: Custo
   if (active && payload && payload.length) {
     const data = payload[0].payload as TelemetryPoint;
     return (
-      <div className="bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-xl border border-slate-700/80 text-xs space-y-2 min-w-52">
-        <div className="flex items-center justify-between pb-1.5 border-b border-slate-800 text-[11px] text-slate-400 font-mono">
-          <span>Sampling Waktu</span>
+      <div className="bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-xl shadow-xl border border-slate-700/80 text-xs space-y-1.5 min-w-48">
+        <div className="flex items-center justify-between pb-1 border-b border-slate-800 text-[11px] text-slate-400 font-mono">
+          <span>Waktu Sampling</span>
           <span className="font-bold text-slate-200">{data.timeLabel} WIB</span>
         </div>
 
@@ -68,8 +67,8 @@ const CustomTooltip = ({ active, payload, activeParameter = 'turbidity' }: Custo
               <span>Outlet (Hasil):</span>
               <span className="font-mono">{data.turbidity_outlet} NTU</span>
             </div>
-            <div className="pt-1 border-t border-slate-800 flex justify-between items-center text-[11px] text-cyan-300 font-medium">
-              <span>Efisiensi Reduksi:</span>
+            <div className="pt-1 border-t border-slate-800 flex justify-between items-center text-[10px] text-cyan-300">
+              <span>Efisiensi:</span>
               <span className="font-mono font-bold">-{data.turbidity_reduction}%</span>
             </div>
           </div>
@@ -78,28 +77,25 @@ const CustomTooltip = ({ active, payload, activeParameter = 'turbidity' }: Custo
         {activeParameter === 'ph' && (
           <div className="space-y-1">
             <div className="flex justify-between items-center text-purple-300">
-              <span>pH Inlet (Baku):</span>
+              <span>Inlet:</span>
               <span className="font-mono font-bold">{data.ph_inlet} pH</span>
             </div>
             <div className="flex justify-between items-center text-blue-400 font-bold">
-              <span>pH Outlet (Hasil):</span>
+              <span>Outlet:</span>
               <span className="font-mono">{data.ph_outlet} pH</span>
-            </div>
-            <div className="pt-1 border-t border-slate-800 text-[10px] text-emerald-400 flex items-center gap-1">
-              <span>Status: Netral Sesuai Baku Mutu</span>
             </div>
           </div>
         )}
 
         {activeParameter === 'temp' && (
           <div className="space-y-1">
-            <div className="flex justify-between items-center text-orange-300">
-              <span>Suhu Inlet:</span>
+            <div className="flex justify-between items-center text-amber-300">
+              <span>Inlet:</span>
               <span className="font-mono font-bold">{data.temp_inlet} °C</span>
             </div>
-            <div className="flex justify-between items-center text-cyan-300">
-              <span>Suhu Outlet:</span>
-              <span className="font-mono font-bold">{data.temp_outlet} °C</span>
+            <div className="flex justify-between items-center text-cyan-300 font-bold">
+              <span>Outlet:</span>
+              <span className="font-mono">{data.temp_outlet} °C</span>
             </div>
           </div>
         )}
@@ -107,11 +103,11 @@ const CustomTooltip = ({ active, payload, activeParameter = 'turbidity' }: Custo
         {activeParameter === 'flow' && (
           <div className="space-y-1">
             <div className="flex justify-between items-center text-blue-300">
-              <span>Laju Alir:</span>
+              <span>Debit Pompa:</span>
               <span className="font-mono font-bold">{data.flow_inlet} L/jam</span>
             </div>
             <div className="flex justify-between items-center text-slate-300">
-              <span>Tekanan Kerja:</span>
+              <span>Tekanan:</span>
               <span className="font-mono font-bold">{data.pressure_inlet} bar</span>
             </div>
           </div>
@@ -214,106 +210,104 @@ export default function MonitoringChartSection() {
   const stats = getStats();
 
   return (
-    <section id="charts" className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-6">
+    <section id="charts" className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-5">
       {/* Header & Controls Toolbar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-blue-100 text-blue-700">
+          <div className="p-2 rounded-xl bg-slate-100 text-slate-700">
             <ChartIcon className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-              Monitoring Chart (Telemetri Data Recharts)
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+              Grafik Telemetri
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Grafik telemetri visual komparatif yang terstandarisasi untuk integrasi data nyata IoT
+              Tren pembacaan data sensor dari waktu ke waktu.
             </p>
           </div>
         </div>
 
         {/* Action Controls: Chart Mode, Parameter, Time Range */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Chart Type Toggle: Area vs Bar */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl text-xs font-semibold">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-medium">
             <button
               onClick={() => setChartType('area')}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
                 chartType === 'area'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold'
+                  ? 'bg-white text-blue-700 shadow-2xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Grafik Area Gradient Kontinu"
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Area Gradient</span>
+              <span>Area</span>
             </button>
             <button
               onClick={() => setChartType('bar')}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
                 chartType === 'bar'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold'
+                  ? 'bg-white text-blue-700 shadow-2xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
-              title="Grafik Batang Komparatif"
             >
               <BarChart3 className="w-3.5 h-3.5" />
-              <span>Bar Komparasi</span>
+              <span>Bar</span>
             </button>
           </div>
 
           {/* Parameter Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl text-xs font-semibold">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-medium">
             <button
               onClick={() => setActiveParameter('turbidity')}
-              className={`px-3 py-1.5 rounded-xl transition-all ${
+              className={`px-2.5 py-1 rounded-lg transition-all ${
                 activeParameter === 'turbidity'
-                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  ? 'bg-blue-600 text-white font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Kekeruhan (NTU)
+              Kekeruhan
             </button>
             <button
               onClick={() => setActiveParameter('ph')}
-              className={`px-3 py-1.5 rounded-xl transition-all ${
+              className={`px-2.5 py-1 rounded-lg transition-all ${
                 activeParameter === 'ph'
-                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  ? 'bg-blue-600 text-white font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              pH Air
+              pH
             </button>
             <button
               onClick={() => setActiveParameter('temp')}
-              className={`px-3 py-1.5 rounded-xl transition-all ${
+              className={`px-2.5 py-1 rounded-lg transition-all ${
                 activeParameter === 'temp'
-                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  ? 'bg-blue-600 text-white font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Suhu (°C)
+              Suhu
             </button>
             <button
               onClick={() => setActiveParameter('flow')}
-              className={`px-3 py-1.5 rounded-xl transition-all ${
+              className={`px-2.5 py-1 rounded-lg transition-all ${
                 activeParameter === 'flow'
-                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  ? 'bg-blue-600 text-white font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Debit Aliran
+              Debit
             </button>
           </div>
 
           {/* Time Range Filter */}
-          <div className="flex items-center gap-1 text-xs font-semibold">
+          <div className="flex items-center gap-1 text-xs">
             {(['1h', '6h', '24h'] as const).map((r) => (
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
                   timeRange === r
-                    ? 'bg-slate-800 text-white shadow-xs'
+                    ? 'bg-slate-800 text-white'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                 }`}
               >
@@ -324,70 +318,66 @@ export default function MonitoringChartSection() {
         </div>
       </div>
 
-      {/* Statistical Summary Callouts */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center">
-          <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Nilai Terendah</div>
-          <div className="text-xl font-black text-slate-800 font-mono mt-0.5">{stats.min}</div>
+      {/* Statistical Summary Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
+          <div className="text-[10px] text-slate-400 font-medium uppercase">Terendah</div>
+          <div className="text-lg font-bold text-slate-800 font-mono mt-0.5">{stats.min}</div>
         </div>
-        <div className="p-3 bg-blue-50/50 rounded-2xl border border-blue-100 text-center">
-          <div className="text-[10px] text-blue-600 font-semibold uppercase tracking-wider">Rerata Periode</div>
-          <div className="text-xl font-black text-blue-700 font-mono mt-0.5">{stats.avg}</div>
+        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
+          <div className="text-[10px] text-slate-400 font-medium uppercase">Rerata</div>
+          <div className="text-lg font-bold text-blue-600 font-mono mt-0.5">{stats.avg}</div>
         </div>
-        <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center">
-          <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Nilai Tertinggi</div>
-          <div className="text-xl font-black text-slate-800 font-mono mt-0.5">{stats.max}</div>
+        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
+          <div className="text-[10px] text-slate-400 font-medium uppercase">Tertinggi</div>
+          <div className="text-lg font-bold text-slate-800 font-mono mt-0.5">{stats.max}</div>
         </div>
-        <div className="p-3 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-center">
-          <div className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider">
-            {activeParameter === 'flow' ? 'Debit Terkini' : 'Nilai Outlet Terkini'}
+        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
+          <div className="text-[10px] text-slate-400 font-medium uppercase">
+            {activeParameter === 'flow' ? 'Debit Terkini' : 'Outlet Terkini'}
           </div>
-          <div className="text-xl font-black text-emerald-800 font-mono mt-0.5">
+          <div className="text-lg font-bold text-emerald-600 font-mono mt-0.5">
             {activeParameter === 'flow' ? stats.latestIn : stats.latestOut}
           </div>
         </div>
       </div>
 
-      {/* Main Recharts Visualization Canvas */}
-      <div className="h-80 sm:h-96 w-full pt-2">
+      {/* Main Recharts Canvas */}
+      <div className="h-72 sm:h-80 w-full pt-1">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'area' ? (
-            /* AREA GRADIENT CHART */
+            /* AREA CHART WITH SOFT MINIMALIST TINT */
             <AreaChart data={displayData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <defs>
-                {/* Turbidity Gradients */}
                 <linearGradient id="gradientTurbIn" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.35} />
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.12} />
                   <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="gradientTurbOut" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.5} />
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                 </linearGradient>
 
-                {/* pH Gradients */}
                 <linearGradient id="gradientPhIn" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35} />
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.12} />
                   <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="gradientPhOut" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1677C8" stopOpacity={0.5} />
+                  <stop offset="5%" stopColor="#1677C8" stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#1677C8" stopOpacity={0.0} />
                 </linearGradient>
 
-                {/* Temp Gradients */}
                 <linearGradient id="gradientTempIn" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.35} />
+                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.12} />
                   <stop offset="95%" stopColor="#f97316" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="gradientTempOut" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.5} />
+                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
                 </linearGradient>
 
-                {/* Flow Gradient */}
                 <linearGradient id="gradientFlow" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1677C8" stopOpacity={0.4} />
+                  <stop offset="5%" stopColor="#1677C8" stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#1677C8" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
@@ -396,7 +386,7 @@ export default function MonitoringChartSection() {
               <XAxis dataKey="timeLabel" stroke="#94a3b8" fontSize={11} tickLine={false} />
               <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip content={<CustomTooltip activeParameter={activeParameter} />} />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }} />
+              <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
 
               {activeParameter === 'turbidity' && (
                 <>
@@ -409,18 +399,18 @@ export default function MonitoringChartSection() {
                   <Area
                     type="monotone"
                     dataKey="turbidity_inlet"
-                    name="Kekeruhan Inlet (Air Baku NTU)"
+                    name="Inlet (Air Baku NTU)"
                     stroke="#f59e0b"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#gradientTurbIn)"
                   />
                   <Area
                     type="monotone"
                     dataKey="turbidity_outlet"
-                    name="Kekeruhan Outlet (Hasil Olahan NTU)"
+                    name="Outlet (Hasil Olahan NTU)"
                     stroke="#10b981"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#gradientTurbOut)"
                   />
@@ -433,29 +423,29 @@ export default function MonitoringChartSection() {
                     y={6.5}
                     stroke="#94a3b8"
                     strokeDasharray="3 3"
-                    label={{ value: 'Batas Min 6.5', fill: '#94a3b8', fontSize: 10 }}
+                    label={{ value: 'Min 6.5', fill: '#94a3b8', fontSize: 10 }}
                   />
                   <ReferenceLine
                     y={8.5}
                     stroke="#94a3b8"
                     strokeDasharray="3 3"
-                    label={{ value: 'Batas Maks 8.5', fill: '#94a3b8', fontSize: 10 }}
+                    label={{ value: 'Maks 8.5', fill: '#94a3b8', fontSize: 10 }}
                   />
                   <Area
                     type="monotone"
                     dataKey="ph_inlet"
-                    name="pH Inlet (Air Baku)"
+                    name="pH Inlet"
                     stroke="#8b5cf6"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#gradientPhIn)"
                   />
                   <Area
                     type="monotone"
                     dataKey="ph_outlet"
-                    name="pH Outlet (Air Hasil)"
+                    name="pH Outlet"
                     stroke="#1677C8"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#gradientPhOut)"
                   />
@@ -467,18 +457,18 @@ export default function MonitoringChartSection() {
                   <Area
                     type="monotone"
                     dataKey="temp_inlet"
-                    name="Temperatur Inlet (°C)"
+                    name="Suhu Inlet (°C)"
                     stroke="#f97316"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#gradientTempIn)"
                   />
                   <Area
                     type="monotone"
                     dataKey="temp_outlet"
-                    name="Temperatur Outlet (°C)"
+                    name="Suhu Outlet (°C)"
                     stroke="#06b6d4"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#gradientTempOut)"
                   />
@@ -491,14 +481,14 @@ export default function MonitoringChartSection() {
                     y={20.0}
                     stroke="#10b981"
                     strokeDasharray="3 3"
-                    label={{ value: 'Kapasitas Nominal 20 L/jam', fill: '#10b981', fontSize: 10 }}
+                    label={{ value: 'Target 20 L/j', fill: '#10b981', fontSize: 10 }}
                   />
                   <Area
                     type="monotone"
                     dataKey="flow_inlet"
-                    name="Laju Alir Pompa (L/jam)"
+                    name="Laju Alir (L/jam)"
                     stroke="#1677C8"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#gradientFlow)"
                   />
@@ -512,23 +502,23 @@ export default function MonitoringChartSection() {
               <XAxis dataKey="timeLabel" stroke="#94a3b8" fontSize={11} tickLine={false} />
               <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip content={<CustomTooltip activeParameter={activeParameter} />} />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }} />
+              <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
 
               {activeParameter === 'turbidity' && (
                 <>
                   <Bar
                     dataKey="turbidity_inlet"
-                    name="Kekeruhan Inlet (NTU)"
+                    name="Inlet (NTU)"
                     fill="#f59e0b"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={32}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
                   />
                   <Bar
                     dataKey="turbidity_outlet"
-                    name="Kekeruhan Outlet (NTU)"
+                    name="Outlet (NTU)"
                     fill="#10b981"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={32}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
                   />
                 </>
               )}
@@ -539,15 +529,15 @@ export default function MonitoringChartSection() {
                     dataKey="ph_inlet"
                     name="pH Inlet"
                     fill="#8b5cf6"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={32}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
                   />
                   <Bar
                     dataKey="ph_outlet"
                     name="pH Outlet"
                     fill="#1677C8"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={32}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
                   />
                 </>
               )}
@@ -558,15 +548,15 @@ export default function MonitoringChartSection() {
                     dataKey="temp_inlet"
                     name="Suhu Inlet (°C)"
                     fill="#f97316"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={32}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
                   />
                   <Bar
                     dataKey="temp_outlet"
                     name="Suhu Outlet (°C)"
                     fill="#06b6d4"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={32}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
                   />
                 </>
               )}
@@ -574,26 +564,15 @@ export default function MonitoringChartSection() {
               {activeParameter === 'flow' && (
                 <Bar
                   dataKey="flow_inlet"
-                  name="Debit Air (L/jam)"
+                  name="Debit (L/jam)"
                   fill="#1677C8"
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={40}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={32}
                 />
               )}
             </BarChart>
           )}
         </ResponsiveContainer>
-      </div>
-
-      {/* IoT Data Implementation Notice */}
-      <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2">
-        <div className="flex items-center gap-1.5 text-blue-600 font-medium">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Struktur Data Telemetri Standar (JSON/MQTT Ready)</span>
-        </div>
-        <div className="text-[11px] text-slate-400 font-mono">
-          Sinkronisasi Otomatis Interval 3 Detik
-        </div>
       </div>
     </section>
   );
