@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { SensorReading } from '@/types/sensor';
-import SensorDetailModal from './SensorDetailModal';
+import SensorGauge from './SensorGauge';
 import {
-  ExternalLink,
   Droplet,
   Compass,
   Gauge,
@@ -13,12 +12,9 @@ import {
 
 interface SensorCardProps {
   sensor: SensorReading;
-  onRunTest?: (sensorId: SensorReading['id']) => void;
 }
 
-export default function SensorCard({ sensor, onRunTest }: SensorCardProps) {
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-
+export default function SensorCard({ sensor }: SensorCardProps) {
   const isInlet = sensor.location === 'inlet';
 
   const getStatusBadge = () => {
@@ -53,106 +49,6 @@ export default function SensorCard({ sensor, onRunTest }: SensorCardProps) {
     }
   };
 
-  // Sparkline SVG
-  const sparkline = sensor.sparkline || [sensor.value];
-  const minVal = Math.min(...sparkline);
-  const maxVal = Math.max(...sparkline);
-  const range = maxVal - minVal || 1;
-  const width = 110;
-  const height = 28;
-
-  const points = sparkline
-    .map((val, idx) => {
-      const x = (idx / (sparkline.length - 1)) * width;
-      const y = height - ((val - minVal) / range) * (height - 6) - 3;
-      return `${x},${y}`;
-    })
-    .join(' ');
-
-  const strokeColor = isInlet ? '#1677C8' : '#059669';
-
-  // Clean, flat parameter bar
-  const renderSimpleMeter = () => {
-    if (sensor.id.includes('turbidity')) {
-      const maxNTU = isInlet ? 150 : 10;
-      const pct = Math.min(100, Math.max(0, (sensor.value / maxNTU) * 100));
-      return (
-        <div className="space-y-1">
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                sensor.value <= 5 ? 'bg-emerald-500' : 'bg-amber-500'
-              }`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-            <span>Baku Mutu: ≤ 5 NTU</span>
-            <span>{sensor.value <= 5 ? 'Aman' : 'Keruh'}</span>
-          </div>
-        </div>
-      );
-    }
-
-    if (sensor.id.includes('ph')) {
-      const pct = Math.min(100, Math.max(0, (sensor.value / 14) * 100));
-      const isNeutral = sensor.value >= 6.5 && sensor.value <= 8.5;
-      return (
-        <div className="space-y-1">
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                isNeutral ? 'bg-blue-600' : 'bg-amber-500'
-              }`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-            <span>Standar: 6.5 – 8.5</span>
-            <span className={isNeutral ? 'text-blue-600 font-medium' : 'text-amber-600 font-medium'}>
-              {isNeutral ? 'Netral' : 'Non-Netral'}
-            </span>
-          </div>
-        </div>
-      );
-    }
-
-    if (sensor.id.includes('flow')) {
-      const pct = Math.min(100, Math.max(0, (sensor.value / 30) * 100));
-      return (
-        <div className="space-y-1">
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-            <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-300"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-            <span>Tekanan: {sensor.secondaryValue ?? 1.82} bar</span>
-            <span>Kapasitas 30 L/j</span>
-          </div>
-        </div>
-      );
-    }
-
-    // Temperature
-    const pct = Math.min(100, Math.max(0, ((sensor.value - 15) / 25) * 100));
-    return (
-      <div className="space-y-1">
-        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-          <div
-            className="h-full bg-slate-600 rounded-full transition-all duration-300"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-          <span>Target: 25°–28°C</span>
-          <span>Normal</span>
-        </div>
-      </div>
-    );
-  };
-
   const getParameterIcon = () => {
     if (sensor.id.includes('turbidity'))
       return <Droplet className={`w-4 h-4 ${isInlet ? 'text-amber-600' : 'text-emerald-600'}`} />;
@@ -163,97 +59,106 @@ export default function SensorCard({ sensor, onRunTest }: SensorCardProps) {
     return <Thermometer className="w-4 h-4 text-rose-600" />;
   };
 
+  // Configure gauge scale and target safe range per sensor type
+  let gaugeMin = 0;
+  let gaugeMax = 100;
+  let targetRange: { min: number; max: number } | undefined;
+
+  if (sensor.id === 'turbidity_inlet') {
+    gaugeMin = 0;
+    gaugeMax = 150;
+    targetRange = { min: 0, max: 100 };
+  } else if (sensor.id === 'turbidity_outlet') {
+    gaugeMin = 0;
+    gaugeMax = 10;
+    targetRange = { min: 0, max: 5.0 };
+  } else if (sensor.id === 'ph_inlet' || sensor.id === 'ph_outlet') {
+    gaugeMin = 0;
+    gaugeMax = 14;
+    targetRange = { min: 6.5, max: 8.5 };
+  } else if (sensor.id === 'flow_inlet') {
+    gaugeMin = 0;
+    gaugeMax = 35;
+    targetRange = { min: 15, max: 25 };
+  } else {
+    // Temperature (temp_inlet, temp_outlet)
+    gaugeMin = 10;
+    gaugeMax = 45;
+    targetRange = { min: 25, max: 28 };
+  }
+
+  // Gauge arc color based on status and location
+  const gaugeColor =
+    sensor.status === 'critical'
+      ? '#ef4444'
+      : sensor.status === 'warning'
+      ? '#f59e0b'
+      : isInlet
+      ? '#1677C8'
+      : '#10b981';
+
   return (
-    <>
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 hover:border-slate-300 transition-all shadow-xs flex flex-col justify-between space-y-3.5">
-        <div>
-          {/* Header */}
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-slate-100">
-                {getParameterIcon()}
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 leading-tight">
-                  {sensor.name}
-                </h4>
-                <span className="text-[10px] font-mono text-slate-400">
-                  {sensor.pin.split(' ')[0]}
-                </span>
-              </div>
-            </div>
-            {getStatusBadge()}
+    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 hover:border-slate-300 transition-all shadow-xs flex flex-col justify-between space-y-3.5">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-slate-100 shrink-0">
+            {getParameterIcon()}
           </div>
-
-          {/* Value & Sparkline */}
-          <div className="flex items-baseline justify-between gap-2 pt-1 pb-2">
-            <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-                  {sensor.value}
-                </span>
-                <span className="text-xs font-bold text-slate-500">{sensor.unit}</span>
-              </div>
-            </div>
-
-            {/* Sparkline */}
-            <div className="shrink-0 flex items-center">
-              <svg width={width} height={height} className="overflow-visible">
-                <polyline
-                  fill="none"
-                  stroke={strokeColor}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={points}
-                />
-              </svg>
-            </div>
-          </div>
-
-          {/* Simple Meter */}
-          <div className="pt-1">
-            {renderSimpleMeter()}
-          </div>
-
-          {/* Min, Avg, Max Callout */}
-          <div className="grid grid-cols-3 gap-1 py-1.5 px-2 text-center text-xs bg-slate-50 rounded-xl my-2.5 border border-slate-100">
-            <div>
-              <div className="text-[9px] text-slate-400 uppercase font-medium">Min</div>
-              <div className="font-mono font-bold text-slate-800 text-[11px]">{sensor.min24h}</div>
-            </div>
-            <div>
-              <div className="text-[9px] text-slate-400 uppercase font-medium">Rata</div>
-              <div className={`font-mono font-bold text-[11px] ${isInlet ? 'text-blue-600' : 'text-emerald-600'}`}>
-                {sensor.avg24h}
-              </div>
-            </div>
-            <div>
-              <div className="text-[9px] text-slate-400 uppercase font-medium">Maks</div>
-              <div className="font-mono font-bold text-slate-800 text-[11px]">{sensor.max24h}</div>
-            </div>
+          <div>
+            <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+              {sensor.name}
+            </h4>
+            <span className="text-[10px] font-mono text-slate-400">
+              {sensor.pin.split(' ')[0]}
+            </span>
           </div>
         </div>
-
-        {/* Button */}
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-          <span className="text-[10px] font-mono text-slate-400">{sensor.lastUpdated}</span>
-          <button
-            onClick={() => setIsDetailOpen(true)}
-            className="py-1 px-2.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-lg transition-all flex items-center gap-1"
-          >
-            <span>Detail</span>
-            <ExternalLink className="w-3 h-3 text-slate-500" />
-          </button>
-        </div>
+        {getStatusBadge()}
       </div>
 
-      {/* Modal Detail */}
-      <SensorDetailModal
-        sensor={isDetailOpen ? sensor : null}
-        onClose={() => setIsDetailOpen(false)}
-        onRunTest={onRunTest}
-      />
-    </>
+      {/* Center: Radial Gauge Meter */}
+      <div className="py-2 flex flex-col items-center justify-center">
+        <SensorGauge
+          value={sensor.value}
+          min={gaugeMin}
+          max={gaugeMax}
+          unit={sensor.unit}
+          targetRange={targetRange}
+          color={gaugeColor}
+        />
+
+        {sensor.secondaryValue !== undefined && (
+          <div className="mt-2 text-[11px] font-mono font-medium text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-md border border-slate-200">
+            Tekanan: {sensor.secondaryValue} {sensor.secondaryUnit}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom: Min, Avg, Max Callouts & Timestamp */}
+      <div className="space-y-2 pt-1 border-t border-slate-100">
+        <div className="grid grid-cols-3 gap-1 py-1.5 px-2 text-center text-xs bg-slate-50 rounded-xl border border-slate-100">
+          <div>
+            <div className="text-[9px] text-slate-400 uppercase font-medium">Min</div>
+            <div className="font-mono font-bold text-slate-800 text-[11px]">{sensor.min24h}</div>
+          </div>
+          <div>
+            <div className="text-[9px] text-slate-400 uppercase font-medium">Rata</div>
+            <div className={`font-mono font-bold text-[11px] ${isInlet ? 'text-blue-600' : 'text-emerald-600'}`}>
+              {sensor.avg24h}
+            </div>
+          </div>
+          <div>
+            <div className="text-[9px] text-slate-400 uppercase font-medium">Maks</div>
+            <div className="font-mono font-bold text-slate-800 text-[11px]">{sensor.max24h}</div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono px-1">
+          <span>{sensor.id}</span>
+          <span>{sensor.lastUpdated}</span>
+        </div>
+      </div>
+    </div>
   );
 }

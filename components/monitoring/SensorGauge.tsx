@@ -25,38 +25,39 @@ export default function SensorGauge({
   const clampedValue = Math.min(Math.max(value, min), max);
   const percentage = ((clampedValue - min) / (max - min)) * 100;
 
-  // Semi-circle math (radius = 42, circumference ~ 132 for 180 deg)
-  const radius = 42;
-  const circumference = Math.PI * radius; // half circle arc length ~ 131.95
+  // Semi-circle math (radius = 40, center = 50,50, arc length = pi * 40)
+  const radius = 40;
+  const circumference = Math.PI * radius; // ~125.66
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="relative w-32 h-20 flex items-end justify-center">
-        <svg className="w-32 h-20 overflow-visible" viewBox="0 0 100 55">
+      <div className="relative w-36 h-22 flex items-end justify-center">
+        <svg className="w-36 h-22 overflow-visible" viewBox="0 0 100 56">
           {/* Background Arc */}
           <path
             d="M 10,50 A 40,40 0 0,1 90,50"
             fill="none"
             stroke="#e2e8f0"
-            strokeWidth="8"
+            strokeWidth="7"
             strokeLinecap="round"
           />
 
-          {/* Normal Range Highlight if provided */}
+          {/* Normal/Target Safe Zone Highlight */}
           {targetRange && (
             <path
               d="M 10,50 A 40,40 0 0,1 90,50"
               fill="none"
-              stroke="#10B981"
-              strokeWidth="8"
+              stroke="#10b981"
+              strokeWidth="7"
               strokeDasharray={`${
                 ((targetRange.max - targetRange.min) / (max - min)) * circumference
               } ${circumference}`}
               strokeDashoffset={`${
                 circumference - ((targetRange.min - min) / (max - min)) * circumference
               }`}
-              opacity="0.3"
+              opacity="0.35"
+              strokeLinecap="round"
             />
           )}
 
@@ -65,25 +66,27 @@ export default function SensorGauge({
             d="M 10,50 A 40,40 0 0,1 90,50"
             fill="none"
             stroke={color}
-            strokeWidth="8"
+            strokeWidth="7"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            className="transition-all duration-700 ease-out"
+            className="transition-all duration-500 ease-out"
           />
         </svg>
 
-        {/* Center Value */}
-        <div className="absolute bottom-0 flex flex-col items-center leading-none">
-          <span className="text-xl font-extrabold text-slate-800 font-mono tracking-tight">
+        {/* Center Numerical Value */}
+        <div className="absolute bottom-1 flex flex-col items-center leading-none">
+          <span className="text-2xl font-black text-slate-900 font-mono tracking-tight">
             {value}
           </span>
-          <span className="text-[10px] text-slate-400 font-semibold">{unit}</span>
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+            {unit}
+          </span>
         </div>
       </div>
 
       {label && <span className="text-xs text-slate-500 font-medium mt-1">{label}</span>}
-      <div className="flex justify-between w-28 text-[9px] text-slate-400 font-mono px-1">
+      <div className="flex justify-between w-32 text-[10px] text-slate-400 font-mono px-0.5 mt-1">
         <span>{min}</span>
         <span>{max}</span>
       </div>

@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSystem } from '@/context/SystemContext';
-import { SensorReading } from '@/types/sensor';
 import SensorCard from '@/components/monitoring/SensorCard';
-import SensorDetailModal from '@/components/monitoring/SensorDetailModal';
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -13,7 +11,6 @@ import {
 
 export default function MonitoringSensorSection() {
   const { sensors } = useSystem();
-  const [selectedSensor, setSelectedSensor] = useState<SensorReading | null>(null);
 
   const inletSensors = sensors.filter((s) => s.location === 'inlet');
   const outletSensors = sensors.filter((s) => s.location === 'outlet');
@@ -63,11 +60,7 @@ export default function MonitoringSensorSection() {
         {/* 4 Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {inletSensors.map((sensor) => (
-            <SensorCard
-              key={sensor.id}
-              sensor={sensor}
-              onRunTest={() => setSelectedSensor(sensor)}
-            />
+            <SensorCard key={sensor.id} sensor={sensor} />
           ))}
         </div>
       </div>
@@ -89,20 +82,10 @@ export default function MonitoringSensorSection() {
         {/* 3 Cards Balanced Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {outletSensors.map((sensor) => (
-            <SensorCard
-              key={sensor.id}
-              sensor={sensor}
-              onRunTest={() => setSelectedSensor(sensor)}
-            />
+            <SensorCard key={sensor.id} sensor={sensor} />
           ))}
         </div>
       </div>
-
-      {/* Sensor Detail Inspection Modal */}
-      <SensorDetailModal
-        sensor={selectedSensor}
-        onClose={() => setSelectedSensor(null)}
-      />
     </section>
   );
 }
