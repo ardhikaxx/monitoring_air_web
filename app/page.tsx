@@ -4,12 +4,9 @@ import React from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import DeviceConnectionCard from '@/components/dashboard/DeviceConnectionCard';
 import StatCard from '@/components/dashboard/StatCard';
-import WaterTreatmentDiagram from '@/components/dashboard/WaterTreatmentDiagram';
 import MonitoringSensorSection from '@/components/dashboard/MonitoringSensorSection';
 import WaterQualityComparison from '@/components/dashboard/WaterQualityComparison';
-import ControlPanelSection from '@/components/dashboard/ControlPanelSection';
 import MonitoringChartSection from '@/components/dashboard/MonitoringChartSection';
-import RecentActivitySection from '@/components/dashboard/RecentActivitySection';
 import { useSystem } from '@/context/SystemContext';
 import {
   Activity,
@@ -19,7 +16,7 @@ import {
   Gauge,
   Waves,
   RefreshCw,
-  Sliders,
+  LineChart,
 } from 'lucide-react';
 
 export default function SinglePageDashboard() {
@@ -77,11 +74,11 @@ export default function SinglePageDashboard() {
               </button>
 
               <button
-                onClick={() => scrollToSection('control-panel')}
+                onClick={() => scrollToSection('charts')}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-[#0e2b44] text-xs font-bold transition-all shadow-md shadow-cyan-500/25"
               >
-                <Sliders className="w-4 h-4 text-[#0e2b44]" />
-                <span>Control Panel</span>
+                <LineChart className="w-4 h-4 text-[#0e2b44]" />
+                <span>Lihat Grafik</span>
               </button>
             </div>
           </div>
@@ -151,23 +148,14 @@ export default function SinglePageDashboard() {
         </div>
       </section>
 
-      {/* SECTION 2: WATER TREATMENT OVERVIEW (MINIATUR PROSES FILTRASI) */}
-      <WaterTreatmentDiagram />
-
-      {/* SECTION 3: MONITORING SENSOR (INLET & OUTLET PANELS) */}
+      {/* SECTION 2: MONITORING SENSOR (INLET & OUTLET PANELS) */}
       <MonitoringSensorSection />
 
-      {/* SECTION 4: WATER QUALITY COMPARISON */}
+      {/* SECTION 3: WATER QUALITY COMPARISON */}
       <WaterQualityComparison />
 
-      {/* SECTION 5: CONTROL PANEL */}
-      <ControlPanelSection />
-
-      {/* SECTION 6: MONITORING CHART (RECHARTS) */}
+      {/* SECTION 4: MONITORING CHART (RECHARTS) */}
       <MonitoringChartSection />
-
-      {/* SECTION 7: RECENT ACTIVITY (LOG TELEMETRI) */}
-      <RecentActivitySection />
     </AppLayout>
   );
 }

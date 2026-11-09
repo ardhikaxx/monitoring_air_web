@@ -4,11 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useSystem } from '@/context/SystemContext';
 import {
   LayoutDashboard,
-  Layers,
   Activity,
-  Sliders,
   LineChart,
-  History,
   Scale,
   Cpu,
   Wifi,
@@ -31,15 +28,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     () => [
       {
         id: 'overview',
-        label: 'Dashboard Overview',
+        label: 'Ringkasan & ESP32',
         icon: LayoutDashboard,
         badge: null,
-      },
-      {
-        id: 'water-treatment',
-        label: 'Alur Filtrasi Air',
-        icon: Layers,
-        badge: <span className="text-[9px] font-mono text-cyan-300">Proses</span>,
       },
       {
         id: 'monitoring',
@@ -55,38 +46,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           ),
       },
       {
-        id: 'quality-comparison',
-        label: 'Komparasi Kualitas',
+        id: 'comparison',
+        label: 'Komparasi Kualitas Air',
         icon: Scale,
         badge: null,
       },
       {
-        id: 'control-panel',
-        label: 'Control Panel',
-        icon: Sliders,
-        badge: (
-          <span className="px-1.5 py-0.2 text-[8px] font-bold tracking-wider rounded bg-blue-500/30 text-blue-200">
-            UJI
-          </span>
-        ),
-      },
-      {
         id: 'charts',
-        label: 'Monitoring Chart',
+        label: 'Grafik Telemetri',
         icon: LineChart,
-        badge: null,
-      },
-      {
-        id: 'activity',
-        label: 'Recent Activity',
-        icon: History,
         badge: null,
       },
     ],
     [warningCount, criticalCount]
   );
 
-  // Smooth scroll to section
   const handleScrollTo = (sectionId: string) => {
     setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
@@ -98,7 +72,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     }
   };
 
-  // Scrollspy to detect active section
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 140;
@@ -144,7 +117,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
             <div>
               <h1 className="font-extrabold text-base tracking-tight leading-none text-white flex items-center gap-1.5">
-                AquaMonitor <span className="text-cyan-400 font-bold text-[10px] px-1 py-0.2 rounded bg-cyan-950/60 border border-cyan-500/30">IoT</span>
+                AquaMonitor <span className="text-cyan-400 font-bold text-[10px] px-1.5 py-0.2 rounded bg-cyan-950/60 border border-cyan-500/30">IoT</span>
               </h1>
               <p className="text-[10px] text-blue-200 tracking-wider font-medium mt-1">
                 Water Treatment System
@@ -161,8 +134,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Navigation Items (Anchor / Scroll to Section) */}
         <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-1">
-          <div className="px-3 pb-2 text-[10px] font-bold text-blue-300 uppercase tracking-widest flex items-center gap-1.5">
-            <span>Navigasi Single Page</span>
+          <div className="px-3 pb-2 text-[10px] font-bold text-blue-300 uppercase tracking-widest">
+            Menu Navigasi
           </div>
 
           {navItems.map((item) => {
